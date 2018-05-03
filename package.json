@@ -1,8 +1,16 @@
 {
   "name": "steam-scraper",
   "version": "1.0.0",
-  "description": "",
+  "description": "This allows you to grab data from steam pages",
+  "author": "Dakota Pierone (https://www.grim3212.com/)",
+  "keywords": ["steam", "scrape"],
+  "bugs": "https://github.com/grim3212/steam-scraper/issues",
+  "license": "MIT",
   "main": "scraper.js",
+  "repository": {
+	"url": "https://github.com/grim3212/steam-scraper",
+	"type": "git"
+  },
   "scripts": {
     "test": "node test.js"
   },
