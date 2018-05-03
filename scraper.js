@@ -20,81 +20,86 @@ function getData(appId, cb) {
         //Send an error
         cb(err, null);
       } else {
-        //Load the body
-        $ = cheerio.load(body);
 
-        var obj = {
-          categories: [],
-          tags: []
-        };
+        try {
+          //Load the body
+          $ = cheerio.load(body);
 
-        $('.game_area_details_specs .name').each(function() {
-          obj.categories.push($(this).text());
-        });
+          var obj = {
+            categories: [],
+            tags: []
+          };
 
-        $('.popular_tags .app_tag').each(function() {
-          if ($(this).text().trim() !== "+") {
-            obj.tags.push($(this).text().trim());
-          }
-        });
+          $('.game_area_details_specs .name').each(function() {
+            obj.categories.push($(this).text());
+          });
 
-        var details = $('.block_content_inner .details_block').first().html().split('<br>');
+          $('.popular_tags .app_tag').each(function() {
+            if ($(this).text().trim() !== "+") {
+              obj.tags.push($(this).text().trim());
+            }
+          });
 
-        for (let line of details) {
-          //Replace tags
-          line = line.replace(/<[^<]+?>/g, '');
+          var details = $('.block_content_inner .details_block').first().html().split('<br>');
 
-          //Replace whitespace, tabs, etc
-          line = line.replace(/[\r\t\n]/g, '');
+          for (let line of details) {
+            //Replace tags
+            line = line.replace(/<[^<]+?>/g, '');
 
-          if (line) {
-            for (let i = 0; i < props.length; i++) {
-              if (line.includes(props[i])) {
-                var detail = line.replace(props[i], '').trim();
+            //Replace whitespace, tabs, etc
+            line = line.replace(/[\r\t\n]/g, '');
 
-                //Genre split on commas
-                if (i === 1) {
-                  //Split and trim each genre
-                  obj[names[i]] = detail.split(',').map(s => s.trim());
-                } else {
-                  obj[names[i]] = detail;
+            if (line) {
+              for (let i = 0; i < props.length; i++) {
+                if (line.includes(props[i])) {
+                  var detail = line.replace(props[i], '').trim();
+
+                  //Genre split on commas
+                  if (i === 1) {
+                    //Split and trim each genre
+                    obj[names[i]] = detail.split(',').map(s => s.trim());
+                  } else {
+                    obj[names[i]] = detail;
+                  }
                 }
               }
             }
           }
-        }
 
-        obj.app_name = $('.apphub_AppName').first().text().trim();
-        var price = $('.game_purchase_price').first().text().trim();
+          obj.app_name = $('.apphub_AppName').first().text().trim();
+          var price = $('.game_purchase_price').first().text().trim();
 
-        if (!price) {
-          price = $('.discount_original_price').first().text().trim();
-          obj.discount_price = $('.discount_final_price').first().text().trim();
-        }
-
-        obj.price = price;
-
-        if ($('.early_access_header').length > 0) {
-          obj.early_access = true;
-        } else {
-          obj.early_access = false;
-        }
-
-        if ($('#game_area_metascore .score').length > 0) {
-          obj.metascore = $('#game_area_metascore .score').first().text().trim();
-        }
-
-        $('.summary .game_review_summary').each(function() {
-          if ($(this).prop('itemprop')) {
-            obj.sentiment = $(this).text().trim();
-
-            //Get number of reviews
-            obj.num_reviews = $(this).parent().find('.responsive_hidden').eq(0).text().trim().slice(1, -1);
+          if (!price) {
+            price = $('.discount_original_price').first().text().trim();
+            obj.discount_price = $('.discount_final_price').first().text().trim();
           }
-        });
 
-        //Return data
-        cb(null, obj);
+          obj.price = price;
+
+          if ($('.early_access_header').length > 0) {
+            obj.early_access = true;
+          } else {
+            obj.early_access = false;
+          }
+
+          if ($('#game_area_metascore .score').length > 0) {
+            obj.metascore = $('#game_area_metascore .score').first().text().trim();
+          }
+
+          $('.summary .game_review_summary').each(function() {
+            if ($(this).prop('itemprop')) {
+              obj.sentiment = $(this).text().trim();
+
+              //Get number of reviews
+              obj.num_reviews = $(this).parent().find('.responsive_hidden').eq(0).text().trim().slice(1, -1);
+            }
+          });
+
+          //Return data
+          cb(null, obj);
+        } catch (err) {
+          cb(err, null);
+        }
       }
     });
 }
